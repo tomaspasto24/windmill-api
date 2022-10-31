@@ -160,17 +160,17 @@ app.post('/auth', async (req, res) => {
 
     const userData = await auth(username, password);
 
-    if(userData) {
+    if (userData) {
         var token = jwt.sign({
             exp: Math.floor(Date.now() / 1000) + 60,
-            data: '{rol: user}'
+            data: `{rol: ${userData.rol}}`
         }, 'secreto');
-        res.send({ 
+        res.send({
             token,
             userData
         });
     } else {
-        res.send({ 
+        res.send({
             error: 'Usuario o contraseña no incorrectos.'
         });
     }
@@ -179,23 +179,16 @@ app.post('/auth', async (req, res) => {
 app.post('/register', async (req, res) => {
     const username = req.body.user;
     const password = req.body.password;
+    const rol = req.body.rol;
 
-    const userData = await auth(username, password);
+    const result = await addUser({
+        _id: uuidv4().toString(),
+        name: username, 
+        password,
+        rol
+    });
 
-    if(userData) {
-        var token = jwt.sign({
-            exp: Math.floor(Date.now() / 1000) + 60,
-            data: '{rol: user}'
-        }, 'secreto');
-        res.send({ 
-            token,
-            userData
-        });
-    } else {
-        res.send({ 
-            error: 'Usuario o contraseña no incorrectos.'
-        });
-    }
+    res.send(result);
 })
 
 // AUTH

@@ -1,19 +1,27 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const Model = require('./model');
 const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 const { addPiece, getPiece, getAllPieces, putPiece, deletePiece } = require('./pieceDatabaseConnection');
 const { addUser, getUser, getAllUsers, deleteUser } = require('./userDatabaseConnection');
 const { addPrototype, getPrototype, getAllPrototypes, putPrototype, deletePrototype } = require('./prototypeDatabaseConnection');
+const { auth } = require('./authDatabaseConnection');
 const { MongoClient } = require('mongodb');
 const mongoString = process.env.DATABASE_URL;
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 
 const app = express()
+var corsOptions = {
+    origin: 'http://localhost:4200',
+    optionsSuccessStatus: 200,
+    methods: "GET, PUT, DELETE"
+}
 const port = 3000;
 
 app.use(bodyParser.json())
+app.use(cors(corsOptions));
 
 // PIECES
 app.get('/pieces', async (req, res) => {
@@ -35,7 +43,7 @@ app.post('/pieces', (req, res) => {
 
 app.get('/pieces/:id', async (req, res) => {
     const result = await getPiece(req.params.id);
-    if(result === null) {
+    if (result === null) {
         res.send("No encontrado.");
     } else {
         res.send(result);
@@ -44,7 +52,7 @@ app.get('/pieces/:id', async (req, res) => {
 
 app.delete('/pieces/:id', async (req, res) => {
     const result = await deletePiece(req.params.id);
-    if(result === null) {
+    if (result === null) {
         res.send("No encontrado.");
     } else {
         res.send(result);
@@ -53,7 +61,7 @@ app.delete('/pieces/:id', async (req, res) => {
 
 app.put('/pieces/:id', async (req, res) => {
     const result = await putPiece(req.params.id, req.body);
-    if(result === null) {
+    if (result === null) {
         res.send("Error");
     } else {
         res.send(result);
@@ -80,7 +88,7 @@ app.post('/users', (req, res) => {
 
 app.get('/users/:id', async (req, res) => {
     const result = await getUser(req.params.id);
-    if(result === null) {
+    if (result === null) {
         res.send("No encontrado.");
     } else {
         res.send(result);
@@ -89,7 +97,7 @@ app.get('/users/:id', async (req, res) => {
 
 app.delete('/users/:id', async (req, res) => {
     const result = await deleteUser(req.params.id);
-    if(result === null) {
+    if (result === null) {
         res.send("No encontrado.");
     } else {
         res.send(result);
@@ -118,7 +126,7 @@ app.post('/prototypes', (req, res) => {
 
 app.get('/prototypes/:id', async (req, res) => {
     const result = await getPrototype(req.params.id);
-    if(result === null) {
+    if (result === null) {
         res.send("No encontrado.");
     } else {
         res.send(result);
@@ -127,7 +135,7 @@ app.get('/prototypes/:id', async (req, res) => {
 
 app.delete('/prototypes/:id', async (req, res) => {
     const result = await deletePrototype(req.params.id);
-    if(result === null) {
+    if (result === null) {
         res.send("No encontrado.");
     } else {
         res.send(result);
@@ -136,13 +144,61 @@ app.delete('/prototypes/:id', async (req, res) => {
 
 app.put('/prototypes/:id', async (req, res) => {
     const result = await putPrototype(req.params.id, req.body);
-    if(result === null) {
+    if (result === null) {
         res.send("Error");
     } else {
         res.send(result);
     }
 })
 // PROTOTYPES
+
+// AUTH
+
+app.post('/auth', async (req, res) => {
+    const username = req.body.user;
+    const password = req.body.password;
+
+    const userData = await auth(username, password);
+
+    if(userData) {
+        var token = jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + 60,
+            data: '{rol: user}'
+        }, 'secreto');
+        res.send({ 
+            token,
+            userData
+        });
+    } else {
+        res.send({ 
+            error: 'Usuario o contraseña no incorrectos.'
+        });
+    }
+})
+
+app.post('/register', async (req, res) => {
+    const username = req.body.user;
+    const password = req.body.password;
+
+    const userData = await auth(username, password);
+
+    if(userData) {
+        var token = jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + 60,
+            data: '{rol: user}'
+        }, 'secreto');
+        res.send({ 
+            token,
+            userData
+        });
+    } else {
+        res.send({ 
+            error: 'Usuario o contraseña no incorrectos.'
+        });
+    }
+})
+
+// AUTH
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}/`);

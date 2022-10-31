@@ -20,8 +20,14 @@ var corsOptions = {
 }
 const port = 3000;
 
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 app.use(cors(corsOptions));
+
+app.use((req, res, next) => {
+    //Realizar autenticación de middleware al token.
+    console.log(`Method: ${req.method} - Route: ${req.originalUrl} - Date: ${Date.now()}`)
+    next();
+})
 
 // PIECES
 app.get('/pieces', async (req, res) => {
@@ -171,7 +177,7 @@ app.post('/auth', async (req, res) => {
         });
     } else {
         res.send({
-            error: 'Usuario o contraseña no incorrectos.'
+            error: 'Usuario o contraseña incorrectos.'
         });
     }
 })
@@ -183,9 +189,9 @@ app.post('/register', async (req, res) => {
 
     const result = await addUser({
         _id: uuidv4().toString(),
-        name: username, 
+        name: username,
         password,
-        rol
+        rol: (!isNaN(rol)) ? rol : 0
     });
 
     res.send(result);

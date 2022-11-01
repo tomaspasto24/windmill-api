@@ -1,6 +1,8 @@
 require('dotenv').config();
 const express = require('express');
+const multer = require('multer');
 const cors = require('cors');
+const path = require('path');
 const Model = require('./model');
 const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
@@ -12,6 +14,8 @@ const { MongoClient } = require('mongodb');
 const mongoString = process.env.DATABASE_URL;
 var bodyParser = require('body-parser');
 
+// Create multer object
+
 const app = express()
 var corsOptions = {
     origin: 'http://localhost:4200',
@@ -22,6 +26,38 @@ const port = 3000;
 
 app.use(bodyParser.json());
 app.use(cors(corsOptions));
+
+// IMAGE
+const imageUpload = multer({
+    storage: multer.diskStorage(
+        {
+            destination: function (req, file, cb) {
+                cb(null, 'images/');
+            },
+            filename: function (req, file, cb) {
+                cb(
+                    null,
+                    new Date().valueOf() + 
+                    '_' +
+                    file.originalname
+                );
+            }
+        }
+    ), 
+});
+
+app.get('/image/:filename', (req, res) => {
+    const { filename } = req.params;
+    const dirname = path.resolve();
+    const fullfilepath = path.join(dirname, 'images/' + filename + '.jpg');
+    return res.sendFile(fullfilepath);
+});
+
+app.post('/image', imageUpload.single('image'), (req, res) => {
+    res.json(req.file);
+});
+
+// IMAGE
 
 app.use((req, res, next) => {
     //Realizar autenticación de middleware al token.
@@ -86,7 +122,7 @@ app.post('/users', (req, res) => {
         _id: uuidv4().toString(),
         name: req.body.name,
         password: req.body.password,
-        rol: req.body.rol,
+        role: req.body.role,
     };
     addUser(newUser);
     res.sendStatus(200);

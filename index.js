@@ -103,7 +103,19 @@ app.delete('/pieces/:id', async (req, res) => {
 })
 
 app.put('/pieces/:id', async (req, res) => {
-    const result = await putPiece(req.params.id, req.body);
+    let result;
+    if(req.body.photo === "") {
+        const oldPhoto = await getPiece(req.params.id);
+        result = await putPiece(req.params.id, {
+            name: req.body.name,
+            airResistance: req.body.airResistance,
+            photo: oldPhoto.photo,
+            material: req.body.material,
+            type: req.body.type
+        });
+    } else {
+        result = await putPiece(req.params.id, req.body);
+    }
     if (result === null) {
         res.send("Error");
     } else {

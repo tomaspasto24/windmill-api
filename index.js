@@ -49,7 +49,7 @@ const imageUpload = multer({
 app.get('/image/:filename', (req, res) => {
     const { filename } = req.params;
     const dirname = path.resolve();
-    const fullfilepath = path.join(dirname, 'images/' + filename + '.jpg');
+    const fullfilepath = path.join(dirname, 'images/' + filename);
     return res.sendFile(fullfilepath);
 });
 
@@ -78,6 +78,7 @@ app.post('/pieces', (req, res) => {
         photo: req.body.photo,
         airResistance: req.body.airResistance,
         material: req.body.material,
+        type: req.body.type
     };
     addPiece(newPiece);
     res.sendStatus(200);

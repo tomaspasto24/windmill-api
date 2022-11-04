@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 const { addPiece, getPiece, getAllPieces, putPiece, deletePiece } = require('./pieceDatabaseConnection');
 const { addUser, getUser, getAllUsers, deleteUser } = require('./userDatabaseConnection');
 const { addPrototype, getPrototype, getAllPrototypes, putPrototype, deletePrototype } = require('./prototypeDatabaseConnection');
-const { auth } = require('./authDatabaseConnection');
+const { auth, sendEmailToRecoverPassword, changePassword } = require('./authDatabaseConnection');
 const { MongoClient } = require('mongodb');
 const mongoString = process.env.DATABASE_URL;
 var bodyParser = require('body-parser');
@@ -245,6 +245,24 @@ app.post('/register', async (req, res) => {
 
     res.send(result);
 })
+
+app.post('/sendemail', async (req, res) => {
+    const email = req.body.email;
+    const result = await sendEmailToRecoverPassword(email);
+
+    res.send(result);
+});
+
+app.post('/changePassword', async (req, res) => {
+    const code = req.body.code;
+    const newPassword = req.body.newPassword;
+    const result = await changePassword(code, newPassword);
+    if(result) {
+        res.send(result);
+    } else {
+        res.send({ error: "No se encuentra el código."});
+    }
+});
 
 // AUTH
 

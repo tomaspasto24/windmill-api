@@ -141,10 +141,10 @@ app.post('/users', (req, res) => {
     res.sendStatus(200);
 })
 
-app.put('/users/:id', (req, res) => {
+app.put('/users/:id', async(req, res) => {
     const { name, password, rol } = req.body;
-    putUser(req.params.id, name, password, rol);
-    res.sendStatus(200);
+    const r = await putUser(req.params.id, name, password, rol);
+    res.send(r);
 })
 
 app.get('/users/:id', async (req, res) => {

@@ -18,8 +18,8 @@ async function putUser(id, name, password, rol) {
     const client = new MongoClient(mongoString);
     try {
         const database = client.db("windmill");
-        const pieces = database.collection("users");
-        const res = await pieces.replaceOne({ _id: id }, { name, password, rol })
+        const users = database.collection("users");
+        const res = await users.replaceOne({ _id: id }, { name, password, rol })
         return res;
     }
     finally {

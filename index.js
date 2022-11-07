@@ -7,7 +7,7 @@ const Model = require('./model');
 const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 const { addPiece, getPiece, getAllPieces, putPiece, deletePiece } = require('./pieceDatabaseConnection');
-const { addUser, getUser, getAllUsers, deleteUser } = require('./userDatabaseConnection');
+const { addUser, getUser, getAllUsers, deleteUser, putUser } = require('./userDatabaseConnection');
 const { addPrototype, getPrototype, getAllPrototypes, putPrototype, deletePrototype } = require('./prototypeDatabaseConnection');
 const { auth, sendEmailToRecoverPassword, changePassword } = require('./authDatabaseConnection');
 const { MongoClient } = require('mongodb');
@@ -138,6 +138,12 @@ app.post('/users', (req, res) => {
         role: req.body.role,
     };
     addUser(newUser);
+    res.sendStatus(200);
+})
+
+app.put('/users/:id', (req, res) => {
+    const { name, password, rol } = req.body;
+    putUser(req.params.id, name, password, rol);
     res.sendStatus(200);
 })
 

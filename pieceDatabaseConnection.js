@@ -2,17 +2,16 @@ const { MongoClient } = require('mongodb');
 const mongoString = process.env.DATABASE_URL;
 
 async function addPiece(piece) {
-    MongoClient.connect(
-        mongoString,
-        (err, client) => {
-            if (err) {
-                return console.log(err)
-            }
-            const db = client.db('windmill')
-            pieceCollection = db.collection('pieces')
-            pieceCollection.insertOne(piece);
-        },
-    )
+    const client = new MongoClient(mongoString);
+    try {
+        const database = client.db("windmill");
+        const pieces = database.collection("pieces");
+        const res = await pieces.insertOne(piece);
+        return res;
+    }
+    finally {
+        await client.close();
+    }
 }
 
 async function getPiece(pieceId) {

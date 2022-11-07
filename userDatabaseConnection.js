@@ -2,17 +2,29 @@ const { MongoClient } = require('mongodb');
 const mongoString = process.env.DATABASE_URL;
 
 async function addUser(user) {
-    MongoClient.connect(
-        mongoString,
-        (err, client) => {
-            if (err) {
-                return console.log(err)
-            }
-            const db = client.db('windmill')
-            userCollection = db.collection('users')
-            userCollection.insertOne(user);
-        },
-    )
+    const client = new MongoClient(mongoString);
+    try {
+        const database = client.db("windmill");
+        const users = database.collection("users");
+        const res = await users.insertOne(user)
+        return res;
+    }
+    finally {
+        await client.close();
+    }
+}
+
+async function putUser(id, name, password, rol) {
+    const client = new MongoClient(mongoString);
+    try {
+        const database = client.db("windmill");
+        const pieces = database.collection("users");
+        const res = await pieces.replaceOne({ _id: id }, { name, password, rol })
+        return res;
+    }
+    finally {
+        await client.close();
+    }
 }
 
 async function getUser(userId) {
@@ -58,4 +70,4 @@ async function deleteUser(userId) {
     }
 }
 
-module.exports = { addUser, getUser, getAllUsers, deleteUser }
+module.exports = { addUser, getUser, getAllUsers, deleteUser, putUser }

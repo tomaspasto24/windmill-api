@@ -2,17 +2,17 @@ const { MongoClient } = require('mongodb');
 const mongoString = process.env.DATABASE_URL;
 
 async function addPrototype(prototype) {
-    MongoClient.connect(
-        mongoString,
-        (err, client) => {
-            if (err) {
-                return console.log(err)
-            }
-            const db = client.db('windmill')
-            prototypeCollection = db.collection('prototypes')
-            prototypeCollection.insertOne(prototype);
-        },
-    )
+
+    const client = new MongoClient(mongoString);
+    try {
+        const database = client.db("windmill");
+        const prototypeList = database.collection("prototypes");
+        const res = await prototypeList.insertOne(prototype);
+        return res;
+    }
+    finally {
+        await client.close();
+    }
 }
 
 async function getPrototype(prototypeId) {

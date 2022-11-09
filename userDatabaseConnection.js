@@ -33,7 +33,12 @@ async function getUser(userId) {
         const database = client.db("windmill");
         const users = database.collection("users");
         const res = await users.findOne({ _id: userId })
-        return res;
+        return {
+            _id: res._id,
+            name: res.name,
+            password: res.password,
+            role: res.rol
+        };
     }
     finally {
         await client.close();
@@ -48,7 +53,12 @@ async function getAllUsers() {
         const users = database.collection("users");
         const cursor = users.find();
         await cursor.forEach(obj => {
-            result.push(obj);
+            result.push({
+                _id: obj._id,
+                name: obj.name,
+                password: obj.password,
+                role: obj.rol
+            });
         });
     }
     finally {

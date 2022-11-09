@@ -8,7 +8,7 @@ const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 const { addPiece, getPiece, getAllPieces, putPiece, deletePiece } = require('./pieceDatabaseConnection');
 const { addUser, getUser, getAllUsers, deleteUser, putUser } = require('./userDatabaseConnection');
-const { addPrototype, getPrototype, getAllPrototypes, putPrototype, deletePrototype } = require('./prototypeDatabaseConnection');
+const { addPrototype, getPrototype, getAllPrototypes, putPrototype, deletePrototype, changeValidatePrototype } = require('./prototypeDatabaseConnection');
 const { auth, sendEmailToRecoverPassword, changePassword } = require('./authDatabaseConnection');
 const { MongoClient } = require('mongodb');
 const mongoString = process.env.DATABASE_URL;
@@ -173,16 +173,26 @@ app.get('/prototypes', async (req, res) => {
     res.send(result);
 })
 
-app.post('/prototypes', (req, res) => {
+app.post('/prototypes', async (req, res) => {
     const newPrototype = {
         _id: uuidv4().toString(),
+        name: req.body.name,
+        description: req.body.description,
         blade: req.body.blade,
         body: req.body.body,
         base: req.body.base,
         creator: req.body.creator,
+        validated: 'Pendiente'
     };
-    addPrototype(newPrototype);
-    res.sendStatus(200);
+    const result = await addPrototype(newPrototype);
+    res.send(result);
+})
+
+app.post('/prototypes/changeValidate/:id', async (req, res) => {
+    const { id } = req.params;
+    const { validated } = req.body;
+    const result = await changeValidatePrototype(id, validated);
+    res.send(result);
 })
 
 app.get('/prototypes/:id', async (req, res) => {

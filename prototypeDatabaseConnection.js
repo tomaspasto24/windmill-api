@@ -58,12 +58,12 @@ async function putPrototype(pieceId, newPiece) {
     }
 }
 
-async function deletePrototype(pieceId) {
+async function changeValidatePrototype(prototypeId, validated) {
     const client = new MongoClient(mongoString);
     try {
         const database = client.db("windmill");
         const prototypes = database.collection("prototypes");
-        const res = await prototypes.deleteOne({ _id: pieceId })
+        const res = await prototypes.updateOne({ _id: prototypeId }, { $set: { validated } })
         return res;
     }
     finally {
@@ -71,4 +71,17 @@ async function deletePrototype(pieceId) {
     }
 }
 
-module.exports = { addPrototype, getPrototype, getAllPrototypes, putPrototype, deletePrototype }
+async function deletePrototype(prototypeId) {
+    const client = new MongoClient(mongoString);
+    try {
+        const database = client.db("windmill");
+        const prototypes = database.collection("prototypes");
+        const res = await prototypes.deleteOne({ _id: prototypeId })
+        return res;
+    }
+    finally {
+        await client.close();
+    }
+}
+
+module.exports = { addPrototype, getPrototype, getAllPrototypes, putPrototype, deletePrototype, changeValidatePrototype }

@@ -27,6 +27,30 @@ const port = 3000;
 app.use(bodyParser.json());
 app.use(cors(corsOptions));
 
+app.use((req, res, next) => {
+    console.log(`Method: ${req.method} - Route: ${req.originalUrl} - Date: ${Date.now()}`)
+    // if(req.originalUrl !== '/auth') {
+    //     const bearerHeader = req.headers['authorization'];
+    //     if(bearerHeader !== undefined) {
+    //         const bearer = bearerHeader.split(' ')[1];
+    //         var decoded = jwt.verify(bearer, 'secreto', Date.now());
+
+    //         const rol = parseInt(decoded.data.split(' ')[1])
+    //         if (rol === 1 || rol === 2 || rol === 3) {
+    //             console.log('Token válido.')
+    //             next();
+    //         } else {
+    //             console.log('Token no válido.')
+    //         }
+    //     } else {
+    //         console.log('No existe token')
+    //     }
+    // } else {
+        next();
+    // }
+})
+
+
 // IMAGE
 const imageUpload = multer({
     storage: multer.diskStorage(
@@ -37,13 +61,13 @@ const imageUpload = multer({
             filename: function (req, file, cb) {
                 cb(
                     null,
-                    new Date().valueOf() + 
+                    new Date().valueOf() +
                     '_' +
                     file.originalname
                 );
             }
         }
-    ), 
+    ),
 });
 
 app.get('/image/:filename', (req, res) => {
@@ -58,12 +82,6 @@ app.post('/image', imageUpload.single('image'), (req, res) => {
 });
 
 // IMAGE
-
-app.use((req, res, next) => {
-    //Realizar autenticación de middleware al token.
-    console.log(`Method: ${req.method} - Route: ${req.originalUrl} - Date: ${Date.now()}`)
-    next();
-})
 
 // PIECES
 app.get('/pieces', async (req, res) => {
@@ -104,7 +122,7 @@ app.delete('/pieces/:id', async (req, res) => {
 
 app.put('/pieces/:id', async (req, res) => {
     let result;
-    if(req.body.photo === "") {
+    if (req.body.photo === "") {
         const oldPhoto = await getPiece(req.params.id);
         result = await putPiece(req.params.id, {
             name: req.body.name,
@@ -130,18 +148,7 @@ app.get('/users', async (req, res) => {
     res.send(result);
 })
 
-app.post('/users', (req, res) => {
-    const newUser = {
-        _id: uuidv4().toString(),
-        name: req.body.name,
-        password: req.body.password,
-        role: req.body.role,
-    };
-    addUser(newUser);
-    res.sendStatus(200);
-})
-
-app.put('/users/:id', async(req, res) => {
+app.put('/users/:id', async (req, res) => {
     const { name, password, rol } = req.body;
     const r = await putUser(req.params.id, name, password, rol);
     res.send(r);
@@ -233,7 +240,6 @@ app.post('/auth', async (req, res) => {
 
     if (userData) {
         var token = jwt.sign({
-            exp: Math.floor(Date.now() / 1000) + 60,
             data: `{rol: ${userData.rol}}`
         }, 'secreto');
         res.send({
@@ -273,10 +279,10 @@ app.post('/changePassword', async (req, res) => {
     const code = req.body.code;
     const newPassword = req.body.newPassword;
     const result = await changePassword(code, newPassword);
-    if(result) {
+    if (result) {
         res.send(result);
     } else {
-        res.send({ error: "No se encuentra el código."});
+        res.send({ error: "No se encuentra el código." });
     }
 });
 

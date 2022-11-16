@@ -28,26 +28,22 @@ app.use(bodyParser.json());
 app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
-    console.log(`Method: ${req.method} - Route: ${req.originalUrl} - Date: ${Date.now()}`)
-    // if(req.originalUrl !== '/auth') {
-    //     const bearerHeader = req.headers['authorization'];
-    //     if(bearerHeader !== undefined) {
-    //         const bearer = bearerHeader.split(' ')[1];
-    //         var decoded = jwt.verify(bearer, 'secreto', Date.now());
+    if(req.originalUrl !== '/auth') {
+        const bearerHeader = req.headers['authorization'];
+        if(bearerHeader !== undefined) {
+            const bearer = bearerHeader.split(' ')[1];
+            var decoded = jwt.verify(bearer, 'secreto', Date.now());
 
-    //         const rol = parseInt(decoded.data.split(' ')[1])
-    //         if (rol === 1 || rol === 2 || rol === 3) {
-    //             console.log('Token válido.')
-    //             next();
-    //         } else {
-    //             console.log('Token no válido.')
-    //         }
-    //     } else {
-    //         console.log('No existe token')
-    //     }
-    // } else {
+            const rol = parseInt(decoded.data.split(' ')[1])
+            if (rol === 1 || rol === 2 || rol === 3) {
+                next();
+            } else {
+            }
+        } else {
+        }
+    } else {
         next();
-    // }
+    }
 })
 
 
@@ -289,5 +285,4 @@ app.post('/changePassword', async (req, res) => {
 // AUTH
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}/`);
 });

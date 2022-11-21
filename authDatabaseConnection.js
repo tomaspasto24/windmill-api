@@ -72,7 +72,6 @@ async function sendEmailToRecoverPassword(email) {
 }
 
 async function changePassword(code, newPassword) {
-    console.log(code)
     const client = new MongoClient(mongoString);
     try {
         const database = client.db("windmill");
@@ -83,7 +82,6 @@ async function changePassword(code, newPassword) {
         }
         const email = res.email
         await codes.deleteMany({ code });
-        console.log(email)
         if (email) {
             const users = database.collection("users");
             const res = await users.updateOne({ name: email }, { $set: {password: newPassword} })

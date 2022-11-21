@@ -18,7 +18,7 @@ var bodyParser = require('body-parser');
 
 const app = express()
 var corsOptions = {
-    origin: 'http://localhost:4200',
+    origin: ['http://localhost:4200', 'http://localhost:8100'],
     optionsSuccessStatus: 200,
     methods: "GET, PUT, DELETE"
 }
@@ -236,12 +236,15 @@ app.post('/auth', async (req, res) => {
     const username = req.body.user;
     const password = req.body.password;
 
+    console.log(username, password)
+
     const userData = await auth(username, password);
 
     if (userData) {
         var token = jwt.sign({
             data: `{rol: ${userData.rol}}`
         }, 'secreto');
+        console.log(token)
         res.send({
             token,
             userData

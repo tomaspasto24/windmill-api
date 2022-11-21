@@ -29,9 +29,9 @@ app.use(cors(corsOptions));
 
 app.use((req, res, next) => {
     console.log(`Method: ${req.method} - Route: ${req.originalUrl} - Date: ${Date.now()}`)
-    if(req.originalUrl !== '/auth') {
+    if (req.originalUrl !== '/auth') {
         const bearerHeader = req.headers['authorization'];
-        if(bearerHeader !== undefined) {
+        if (bearerHeader !== undefined) {
             const bearer = bearerHeader.split(' ')[1];
             var decoded = jwt.verify(bearer, 'secreto', Date.now());
 
@@ -192,12 +192,25 @@ app.post('/prototypes', async (req, res) => {
     res.send(result);
 })
 
-app.post('/prototypes/changeValidate/:id', async (req, res) => {
-    const { id } = req.params;
+app.post('/prototypes/changeValidate', async (req, res) => {
+    const { id } = req.body;
     const { validated } = req.body;
-    const result = await changeValidatePrototype(id, validated);
-    res.send(result);
-})
+
+    const bearerHeader = req.headers['authorization'];
+    if (bearerHeader) {
+        const bearer = bearerHeader.split(' ')[1];
+        var decoded = jwt.verify(bearer, 'secreto', Date.now());
+
+        const rol = parseInt(decoded.data.split(' ')[1])
+        if (rol === 2 || rol === 3) {
+            const result = await changeValidatePrototype(id, validated);
+            res.send(result);
+        } else {
+            res.send({error: "Rol no autorizado"});
+        }
+    }
+}
+)
 
 app.get('/prototypes/:id', async (req, res) => {
     const result = await getPrototype(req.params.id);
@@ -232,8 +245,6 @@ app.put('/prototypes/:id', async (req, res) => {
 app.post('/auth', async (req, res) => {
     const username = req.body.user;
     const password = req.body.password;
-
-    console.log(username, password)
 
     const userData = await auth(username, password);
 
